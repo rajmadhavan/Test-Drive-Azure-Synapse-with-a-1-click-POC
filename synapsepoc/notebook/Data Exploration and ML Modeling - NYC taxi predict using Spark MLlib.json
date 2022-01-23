@@ -17,7 +17,7 @@
 				"spark.dynamicAllocation.enabled": "false",
 				"spark.dynamicAllocation.minExecutors": "2",
 				"spark.dynamicAllocation.maxExecutors": "2",
-				"spark.autotune.trackingId": "af3e79f7-00a3-477c-80ba-2bea99fac6ca"
+				"spark.autotune.trackingId": "1eab77e9-892a-47b0-b608-726ce7b7e103"
 			}
 		},
 		"metadata": {
@@ -293,7 +293,7 @@
 					"metrics = BinaryClassificationMetrics(predictionAndLabels)\n",
 					"print(\"Area under ROC = %s\" % metrics.areaUnderROC)"
 				],
-				"execution_count": 10
+				"execution_count": 9
 			},
 			{
 				"cell_type": "markdown",
