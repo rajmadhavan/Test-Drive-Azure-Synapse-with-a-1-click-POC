@@ -7,6 +7,10 @@
 			"metadata": "Workspace name",
 			"defaultValue": "rcgwchpqipidcte4pocws1"
 		},
+		"TestStorageLakehouse_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'TestStorageLakehouse'"
+		},
 		"TripFaresSynapseAnalyticsLinkedService_connectionString": {
 			"type": "secureString",
 			"metadata": "Secure string for 'connectionString' of 'TripFaresSynapseAnalyticsLinkedService'"
@@ -1101,6 +1105,26 @@
 			"dependsOn": []
 		},
 		{
+			"name": "[concat(parameters('workspaceName'), '/TestStorageLakehouse')]",
+			"type": "Microsoft.Synapse/workspaces/linkedServices",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"description": "test ",
+				"annotations": [],
+				"type": "AzureBlobStorage",
+				"typeProperties": {
+					"connectionString": "[parameters('TestStorageLakehouse_connectionString')]"
+				},
+				"connectVia": {
+					"referenceName": "AutoResolveIntegrationRuntime",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/integrationRuntimes/AutoResolveIntegrationRuntime')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('workspaceName'), '/TripFaresDataLakeStorageLinkedService')]",
 			"type": "Microsoft.Synapse/workspaces/linkedServices",
 			"apiVersion": "2019-06-01-preview",
@@ -1316,7 +1340,7 @@
 						"spark.dynamicAllocation.enabled": "false",
 						"spark.dynamicAllocation.minExecutors": "2",
 						"spark.dynamicAllocation.maxExecutors": "2",
-						"spark.autotune.trackingId": "85b5a65e-fe29-4095-bc4d-bd883ac439e7"
+						"spark.autotune.trackingId": "1eab77e9-892a-47b0-b608-726ce7b7e103"
 					}
 				},
 				"metadata": {
@@ -1341,15 +1365,12 @@
 						"sparkVersion": "2.4",
 						"nodeCount": 5,
 						"cores": 8,
-						"memory": 56,
-						"automaticScaleJobs": false
-					},
-					"sessionKeepAliveTimeout": 30
+						"memory": 56
+					}
 				},
 				"cells": [
 					{
 						"cell_type": "markdown",
-						"metadata": {},
 						"source": [
 							"# Predict NYC Taxi Tips using Spark ML and Azure Open Datasets\n",
 							"\n",
@@ -1362,7 +1383,6 @@
 					},
 					{
 						"cell_type": "code",
-						"metadata": {},
 						"source": [
 							"import matplotlib.pyplot as plt\n",
 							"\n",
@@ -1385,7 +1405,6 @@
 					},
 					{
 						"cell_type": "markdown",
-						"metadata": {},
 						"source": [
 							"## Ingest Data¶ \n",
 							"\n",
@@ -1394,7 +1413,6 @@
 					},
 					{
 						"cell_type": "code",
-						"metadata": {},
 						"source": [
 							"# Import NYC yellow cab data from Azure Open Datasets\n",
 							"from azureml.opendatasets import NycTlcYellow\n",
@@ -1413,7 +1431,6 @@
 					},
 					{
 						"cell_type": "code",
-						"metadata": {},
 						"source": [
 							"#To make development easier, faster and less expensive downsample for now\n",
 							"sampled_taxi_df = nyc_tlc_df.sample(True, 0.001, seed=1234)"
@@ -1423,7 +1440,6 @@
 					},
 					{
 						"cell_type": "markdown",
-						"metadata": {},
 						"source": [
 							"## Exploratory Data Analysis\n",
 							"\n",
@@ -1432,7 +1448,6 @@
 					},
 					{
 						"cell_type": "code",
-						"metadata": {},
 						"source": [
 							"#The charting package needs a Pandas dataframe or numpy array do the conversion\n",
 							"sampled_taxi_pd_df = sampled_taxi_df.toPandas()\n",
@@ -1467,7 +1482,6 @@
 					},
 					{
 						"cell_type": "markdown",
-						"metadata": {},
 						"source": [
 							"## Data Prep and Featurization\n",
 							"\n",
@@ -1479,7 +1493,6 @@
 					},
 					{
 						"cell_type": "code",
-						"metadata": {},
 						"source": [
 							"taxi_df = sampled_taxi_df.select('totalAmount', 'fareAmount', 'tipAmount', 'paymentType', 'rateCodeId', 'passengerCount'\\\n",
 							"                                , 'tripDistance', 'tpepPickupDateTime', 'tpepDropoffDateTime'\\\n",
@@ -1502,7 +1515,6 @@
 					},
 					{
 						"cell_type": "markdown",
-						"metadata": {},
 						"source": [
 							"## Data Prep and Featurization Part 2\n",
 							"\n",
@@ -1514,7 +1526,6 @@
 					},
 					{
 						"cell_type": "code",
-						"metadata": {},
 						"source": [
 							"taxi_featurised_df = taxi_df.select('totalAmount', 'fareAmount', 'tipAmount', 'paymentType', 'passengerCount'\\\n",
 							"                                                , 'tripDistance', 'weekdayString', 'pickupHour','tripTimeSecs','tipped'\\\n",
@@ -1531,7 +1542,6 @@
 					},
 					{
 						"cell_type": "markdown",
-						"metadata": {},
 						"source": [
 							"## Encoding\n",
 							"\n",
@@ -1545,7 +1555,6 @@
 					},
 					{
 						"cell_type": "code",
-						"metadata": {},
 						"source": [
 							"# The sample uses an algorithm that only works with numeric features convert them so they can be consumed\n",
 							"sI1 = StringIndexer(inputCol=\"trafficTimeBins\", outputCol=\"trafficTimeBinsIndex\"); \n",
@@ -1561,7 +1570,6 @@
 					},
 					{
 						"cell_type": "markdown",
-						"metadata": {},
 						"source": [
 							"## Generation of Testing and Training Data Sets\n",
 							"Simple split, 70% for training and 30% for testing the model. Playing with this ratio may result in different models.\n",
@@ -1570,7 +1578,6 @@
 					},
 					{
 						"cell_type": "code",
-						"metadata": {},
 						"source": [
 							"# Decide on the split between training and testing data from the dataframe \n",
 							"trainingFraction = 0.7\n",
@@ -1585,7 +1592,6 @@
 					},
 					{
 						"cell_type": "markdown",
-						"metadata": {},
 						"source": [
 							"## Train the Model\n",
 							"\n",
@@ -1594,7 +1600,6 @@
 					},
 					{
 						"cell_type": "code",
-						"metadata": {},
 						"source": [
 							"## Create a new LR object for the model\n",
 							"logReg = LogisticRegression(maxIter=10, regParam=0.3, labelCol = 'tipped')\n",
@@ -1618,11 +1623,10 @@
 							"print(\"Area under ROC = %s\" % metrics.areaUnderROC)"
 						],
 						"outputs": [],
-						"execution_count": 10
+						"execution_count": 9
 					},
 					{
 						"cell_type": "markdown",
-						"metadata": {},
 						"source": [
 							"## Evaluate and Visualize\n",
 							"\n",
@@ -1632,7 +1636,6 @@
 					},
 					{
 						"cell_type": "code",
-						"metadata": {},
 						"source": [
 							"## Plot the ROC curve, no need for pandas as this uses the modelSummary object\n",
 							"modelSummary = lrModel.stages[-1].summary\n",
@@ -1646,6 +1649,183 @@
 						],
 						"outputs": [],
 						"execution_count": null
+					}
+				]
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/NYC Taxi data with a Spark pool')]",
+			"type": "Microsoft.Synapse/workspaces/notebooks",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"description": "https://docs.microsoft.com/en-us/azure/synapse-analytics/get-started-analyze-spark",
+				"nbformat": 4,
+				"nbformat_minor": 2,
+				"bigDataPool": {
+					"referenceName": "ws1sparkpool1",
+					"type": "BigDataPoolReference"
+				},
+				"sessionProperties": {
+					"driverMemory": "56g",
+					"driverCores": 8,
+					"executorMemory": "56g",
+					"executorCores": 8,
+					"numExecutors": 2,
+					"conf": {
+						"spark.dynamicAllocation.enabled": "false",
+						"spark.dynamicAllocation.minExecutors": "2",
+						"spark.dynamicAllocation.maxExecutors": "2",
+						"spark.autotune.trackingId": "8d5477b9-ac8d-4e06-97b1-60f7d11ab5c2"
+					}
+				},
+				"metadata": {
+					"saveOutput": true,
+					"enableDebugMode": false,
+					"kernelspec": {
+						"name": "synapse_pyspark",
+						"display_name": "Synapse PySpark"
+					},
+					"language_info": {
+						"name": "python"
+					},
+					"a365ComputeOptions": {
+						"id": "/subscriptions/6802aabb-9a39-47c2-b735-2931623a7d4a/resourceGroups/testdriveSynapse-RG/providers/Microsoft.Synapse/workspaces/rcgwchpqipidcte4pocws1/bigDataPools/ws1sparkpool1",
+						"name": "ws1sparkpool1",
+						"type": "Spark",
+						"endpoint": "https://rcgwchpqipidcte4pocws1.dev.azuresynapse.net/livyApi/versions/2019-11-01-preview/sparkPools/ws1sparkpool1",
+						"auth": {
+							"type": "AAD",
+							"authResource": "https://dev.azuresynapse.net"
+						},
+						"sparkVersion": "2.4",
+						"nodeCount": 5,
+						"cores": 8,
+						"memory": 56
+					}
+				},
+				"cells": [
+					{
+						"cell_type": "code",
+						"metadata": {
+							"microsoft": {
+								"language": "python"
+							},
+							"collapsed": false
+						},
+						"source": [
+							"%%pyspark\r\n",
+							"df = spark.read.load('abfss://public@rcgwchpqipidcte4poc.dfs.core.windows.net/NYCTripSmall.parquet', format='parquet')\r\n",
+							"display(df.limit(10))"
+						],
+						"outputs": [],
+						"execution_count": 3
+					},
+					{
+						"cell_type": "code",
+						"metadata": {
+							"jupyter": {
+								"source_hidden": false,
+								"outputs_hidden": false
+							},
+							"nteract": {
+								"transient": {
+									"deleting": false
+								}
+							},
+							"microsoft": {
+								"language": "python"
+							}
+						},
+						"source": [
+							"%%pyspark\r\n",
+							"df.printSchema()"
+						],
+						"outputs": [],
+						"execution_count": 4
+					},
+					{
+						"cell_type": "code",
+						"metadata": {
+							"jupyter": {
+								"source_hidden": false,
+								"outputs_hidden": false
+							},
+							"nteract": {
+								"transient": {
+									"deleting": false
+								}
+							},
+							"microsoft": {
+								"language": "python"
+							}
+						},
+						"source": [
+							"%%pyspark\r\n",
+							"spark.sql(\"CREATE DATABASE IF NOT EXISTS nyctaxi\")\r\n",
+							"df.write.mode(\"overwrite\").saveAsTable(\"nyctaxi.trip\")"
+						],
+						"outputs": [],
+						"execution_count": 5
+					},
+					{
+						"cell_type": "code",
+						"metadata": {
+							"jupyter": {
+								"source_hidden": false,
+								"outputs_hidden": false
+							},
+							"nteract": {
+								"transient": {
+									"deleting": false
+								}
+							},
+							"microsoft": {
+								"language": "python"
+							},
+							"collapsed": false
+						},
+						"source": [
+							"%%pyspark\r\n",
+							"df = spark.sql(\"SELECT * FROM nyctaxi.trip\") \r\n",
+							"display(df)"
+						],
+						"outputs": [],
+						"execution_count": 6
+					},
+					{
+						"cell_type": "code",
+						"metadata": {
+							"jupyter": {
+								"source_hidden": false,
+								"outputs_hidden": false
+							},
+							"nteract": {
+								"transient": {
+									"deleting": false
+								}
+							},
+							"microsoft": {
+								"language": "python"
+							},
+							"collapsed": false
+						},
+						"source": [
+							"%%pyspark\r\n",
+							"df = spark.sql(\"\"\"\r\n",
+							"   SELECT PassengerCount,\r\n",
+							"       SUM(TripDistanceMiles) as SumTripDistance,\r\n",
+							"       AVG(TripDistanceMiles) as AvgTripDistance\r\n",
+							"   FROM nyctaxi.trip\r\n",
+							"   WHERE TripDistanceMiles > 0 AND PassengerCount > 0\r\n",
+							"   GROUP BY PassengerCount\r\n",
+							"   ORDER BY PassengerCount\r\n",
+							"\"\"\") \r\n",
+							"display(df)\r\n",
+							"df.write.saveAsTable(\"nyctaxi.passengercountstats\")"
+						],
+						"outputs": [],
+						"execution_count": 7
 					}
 				]
 			},
@@ -1671,11 +1851,344 @@
 			"dependsOn": []
 		},
 		{
-			"name": "[concat(parameters('workspaceName'), '/ws1sparkpool1')]",
-			"type": "Microsoft.Synapse/workspaces/bigDataPools",
+			"name": "[concat(parameters('workspaceName'), '/test')]",
+			"type": "Microsoft.Synapse/workspaces/sqlscripts",
 			"apiVersion": "2019-06-01-preview",
 			"properties": {
-				"annotations": []
+				"content": {
+					"query": "",
+					"metadata": {
+						"language": "sql"
+					},
+					"currentConnection": {
+						"databaseName": "master",
+						"poolName": "Built-in"
+					},
+					"resultLimit": 5000
+				},
+				"type": "SqlQuery"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/1 - Taxi Zones - External Table')]",
+			"type": "Microsoft.Synapse/workspaces/sqlscripts",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"folder": {
+					"name": "Dedicated SQL Pool"
+				},
+				"content": {
+					"query": "-- Create master key\nCREATE MASTER KEY;\nGO\n\n-- Create credential to access Data Lake\nCREATE DATABASE SCOPED CREDENTIAL PSDataLakeCredential\nWITH \n\tIDENTITY = 'user', \n\tSecret = 'puD0uVgUHzWvl0jz55Bm9dvmvjchKMluio9lovcXUbeE84ubk7e8Oa2F//Bdv/cyN6teK21DLrdMyn/wzLj/WQ==';\nGO\n\n-- Create external data source, pointing to Data Lake\nCREATE EXTERNAL DATA SOURCE PSDataLake\nwith (  \n      TYPE = HADOOP,\n      LOCATION ='abfss://taxidata@pstaxisdatalake.dfs.core.windows.net',  \n      CREDENTIAL = PSDataLakeCredential  \n);  \nGO\n\n-- Create external file format\nCREATE EXTERNAL FILE FORMAT CSVFileFormat \nWITH \n(   FORMAT_TYPE = DELIMITEDTEXT\n,   FORMAT_OPTIONS  \n\t(   \n\t\tFIELD_TERMINATOR   = ','\n\t\t, STRING_DELIMITER = '\"'\n        , DATE_FORMAT      = 'yyyy-MM-dd HH:mm:ss'\n        , USE_TYPE_DEFAULT = FALSE\n        , FIRST_ROW  = 2\n    )\n);\nGO\n\n-- Create schema for external resources\nCREATE SCHEMA ext\nGO\n\n-- Create external table for Taxi Zones\nCREATE EXTERNAL TABLE ext.TaxiZones\n(\n\tLocationId INT,\n\tBorough NVARCHAR(100),\n\tZone NVARCHAR(100),\n    ServiceZone NVARCHAR(100)\n)\nWITH\n(\n    DATA_SOURCE = PSDataLake\n  , FILE_FORMAT = CSVFileFormat  \n  , LOCATION='/TaxiZones/TaxiZones1.csv'  \n)\nGO\n\nSELECT * FROM ext.TaxiZones\nGO\n\n\n\n\n\n\n\n-- Drop external table\nDROP EXTERNAL TABLE ext.TaxiZones\n\n-- Recreate external table\nCREATE EXTERNAL TABLE ext.TaxiZones\n(\n\tLocationId INT,\n\tBorough NVARCHAR(100),\n\tZone NVARCHAR(100),\n    ServiceZone NVARCHAR(100)\n)\nWITH\n(\n    DATA_SOURCE = PSDataLake\n  , FILE_FORMAT = CSVFileFormat  \n  , LOCATION='/TaxiZones/'    \n  , REJECT_TYPE = VALUE\n  , REJECT_VALUE = 1\n  , REJECTED_ROW_LOCATION='/Errors/TaxiZones'\n)\nGO\n\nSELECT * FROM ext.TaxiZones\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n",
+					"metadata": {
+						"language": "sql"
+					},
+					"currentConnection": {
+						"databaseName": "master",
+						"poolName": "Built-in"
+					},
+					"resultLimit": 5000
+				},
+				"type": "SqlQuery"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/2 - Yellow Taxis - External Table')]",
+			"type": "Microsoft.Synapse/workspaces/sqlscripts",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"folder": {
+					"name": "Dedicated SQL Pool"
+				},
+				"content": {
+					"query": "IF NOT EXISTS (SELECT * FROM sys.external_file_formats WHERE name = 'SynapseParquetFormat') \n\tCREATE EXTERNAL FILE FORMAT [SynapseParquetFormat] \n\tWITH ( FORMAT_TYPE = PARQUET)\nGO\n\nIF NOT EXISTS (SELECT * FROM sys.external_data_sources WHERE name = 'taxidata_pstaxisdatalake_dfs_core_windows_net') \n\tCREATE EXTERNAL DATA SOURCE [taxidata_pstaxisdatalake_dfs_core_windows_net] \n\tWITH (\n\t\tLOCATION = 'abfss://taxidata@pstaxisdatalake.dfs.core.windows.net', \n\t\tTYPE     = HADOOP \n\t)\nGO\n\nCREATE EXTERNAL TABLE ext.YellowTaxis (\n\t[VendorID] int,\n\t[tpep_pickup_datetime] datetime2(7),\n\t[tpep_dropoff_datetime] datetime2(7),\n\t[passenger_count] int,\n\t[trip_distance] float,\n\t[RatecodeID] int,\n\t[store_and_fwd_flag] varchar(8000),\n\t[PULocationID] int,\n\t[DOLocationID] int,\n\t[payment_type] int,\n\t[fare_amount] float,\n\t[extra] float,\n\t[mta_tax] float,\n\t[tip_amount] float,\n\t[tolls_amount] float,\n\t[improvement_surcharge] float,\n\t[total_amount] float,\n\t[congestion_surcharge] float\n\t)\n\tWITH (\n\tLOCATION = 'YellowTaxis_201911.parquet',\n\tDATA_SOURCE = [taxidata_pstaxisdatalake_dfs_core_windows_net],\n\tFILE_FORMAT = [SynapseParquetFormat],\n\tREJECT_TYPE = VALUE,\n\tREJECT_VALUE = 0\n\t)\nGO\n\nSELECT TOP 100 * FROM ext.YellowTaxis\nGO\n\n-- Create schema 'main' for Dedicated SQL Pool tables\nCREATE SCHEMA main\nGO\n\n-- Create table main.YellowTaxis, using CTAS (Polybase)\nCREATE TABLE main.YellowTaxis\nWITH \n(\n\tDISTRIBUTION = ROUND_ROBIN,\n\tCLUSTERED COLUMNSTORE INDEX\n) \nAS \nSELECT * \nFROM ext.YellowTaxis\n\n\n\nSELECT TOP 10000 * FROM main.YellowTaxis\n\n\n\n    \n\n\n\n\n\n\n\n\n\n\n\n\n",
+					"metadata": {
+						"language": "sql"
+					},
+					"currentConnection": {
+						"databaseName": "master",
+						"poolName": "Built-in"
+					},
+					"resultLimit": 5000
+				},
+				"type": "SqlQuery"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/3 - Write to Data Lake')]",
+			"type": "Microsoft.Synapse/workspaces/sqlscripts",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"folder": {
+					"name": "Dedicated SQL Pool"
+				},
+				"content": {
+					"query": "CREATE EXTERNAL TABLE ext.ProcessedYellowTaxis\nWITH \n(  \n    DATA_SOURCE = PSDataLake,\n    FILE_FORMAT = SynapseParquetFormat,\n    LOCATION='/Facts/YellowTaxis.parquet'    \n) \nAS\nSELECT \n      PickupTime        = tpep_pickup_datetime\n    , DropTime          = tpep_dropoff_datetime\n    , Passengers        = passenger_count\n    , TripDistance      = trip_distance\n    , RateCodeId        = RatecodeID\n    , PickupLocationId  = PULocationID\n    , DropLocationId    = DOLocationID\n    , PaymentTypeId     = payment_type\n    , TotalAmount       = total_amount    \nFROM main.YellowTaxis y\n    INNER JOIN ext.TaxiZones z ON y.PULocationID = z.LocationID\nWHERE tpep_pickup_datetime >= '2019-11-01' \n    AND tpep_pickup_datetime < '2019-12-01'\n    AND passenger_count > 0\n\tAND z.ServiceZone = 'Yellow Zone';",
+					"metadata": {
+						"language": "sql"
+					},
+					"currentConnection": {
+						"databaseName": "master",
+						"poolName": "Built-in"
+					},
+					"resultLimit": 5000
+				},
+				"type": "SqlQuery"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/4 - Copy TaxiZones')]",
+			"type": "Microsoft.Synapse/workspaces/sqlscripts",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"folder": {
+					"name": "Dedicated SQL Pool"
+				},
+				"content": {
+					"query": "IF NOT EXISTS (SELECT * FROM sys.objects O JOIN sys.schemas S ON O.schema_id = S.schema_id WHERE O.NAME = 'TaxiZonesCopy' AND O.TYPE = 'U' AND S.NAME = 'main')\nCREATE TABLE main.TaxiZonesCopy\n\t(\n\t [LocationID] bigint,\n\t [Borough] nvarchar(500),\n\t [Zone] nvarchar(500),\n\t [ServiceZone] nvarchar(500)\n\t)\nWITH\n\t(\n\tDISTRIBUTION = ROUND_ROBIN,\n\t CLUSTERED COLUMNSTORE INDEX\t \n\t)\nGO\n\nCOPY INTO main.TaxiZonesCopy\n(LocationID 1, Borough 2, Zone 3, ServiceZone 4)\nFROM 'https://pstaxisdatalake.dfs.core.windows.net/taxidata/TaxiZones/*.csv'\nWITH\n(\n\tFILE_TYPE = 'CSV'\n\t,MAXERRORS = 10\n\t,FIRSTROW = 2\n\t,ERRORFILE = 'https://pstaxisdatalake.dfs.core.windows.net/taxidata/ErrorRows/TaxiZones2'\n\t,IDENTITY_INSERT = 'OFF'\n)\n--END\nGO\n\nSELECT TOP 100 * FROM main.TaxiZonesCopy\nGO\n\n\n\n\n",
+					"metadata": {
+						"language": "sql"
+					},
+					"currentConnection": {
+						"databaseName": "master",
+						"poolName": "Built-in"
+					},
+					"resultLimit": 5000
+				},
+				"type": "SqlQuery"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/5 - Table Distributions')]",
+			"type": "Microsoft.Synapse/workspaces/sqlscripts",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"folder": {
+					"name": "Dedicated SQL Pool"
+				},
+				"content": {
+					"query": "-- Create Round Robin table for Yellow Taxis\nCREATE TABLE main.YellowTaxis_RoundRobin\nWITH\n(\n    DISTRIBUTION = ROUND_ROBIN\n)\nAS\nSELECT * \nFROM ext.YellowTaxis\n\n-- Check distribution of data\nDBCC PDW_SHOWSPACEUSED('main.YellowTaxis_RoundRobin')\n\n-- Create Hash table for Yellow Taxis, based on PULocationID\nCREATE TABLE main.YellowTaxis_Hash\nWITH\n(\n    DISTRIBUTION = HASH(PULocationID)\n)\nAS\nSELECT  *\nFROM ext.YellowTaxis\n\n-- Check distribution of data\nDBCC PDW_SHOWSPACEUSED('main.YellowTaxis_Hash')\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n",
+					"metadata": {
+						"language": "sql"
+					},
+					"currentConnection": {
+						"databaseName": "master",
+						"poolName": "Built-in"
+					},
+					"resultLimit": 5000
+				},
+				"type": "SqlQuery"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/6 - Compare Distribution Performance')]",
+			"type": "Microsoft.Synapse/workspaces/sqlscripts",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"folder": {
+					"name": "Dedicated SQL Pool"
+				},
+				"content": {
+					"query": "-- Run query on Round Robin distributed table\nSELECT [PULocationID]\n\t, DATENAME(WEEKDAY, tpep_pickup_datetime)\n\t, AVG(\n\t\t\tDATEDIFF(SECOND, tpep_pickup_datetime, tpep_dropoff_datetime)\n\t\t )\nFROM main.YellowTaxis_RoundRobin\nGROUP BY [PULocationID]\n\t, DATENAME(WEEKDAY, tpep_pickup_datetime)\n\n\n\n-- Run query on Hash distributed table\nSELECT [PULocationID]\n\t, DATENAME(WEEKDAY, tpep_pickup_datetime)\n\t, AVG(\n\t\t\tDATEDIFF(SECOND, tpep_pickup_datetime, tpep_dropoff_datetime)\n\t\t )\nFROM main.YellowTaxis_Hash\nGROUP BY [PULocationID]\n\t, DATENAME(WEEKDAY, tpep_pickup_datetime)\n",
+					"metadata": {
+						"language": "sql"
+					},
+					"currentConnection": {
+						"databaseName": "master",
+						"poolName": "Built-in"
+					},
+					"resultLimit": 5000
+				},
+				"type": "SqlQuery"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/2 - LoadTaxiZones Stored Procedure')]",
+			"type": "Microsoft.Synapse/workspaces/sqlscripts",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"folder": {
+					"name": "Synapse Pipelines"
+				},
+				"content": {
+					"query": "CREATE PROCEDURE main.LoadTaxiZones\nAS \nBEGIN\n    \n    /******************************************************************************\n        Create or truncate main.TaxiZones\n    ******************************************************************************/\n    IF NOT EXISTS (SELECT * FROM sys.tables t INNER JOIN sys.schemas s ON t.schema_id = s.schema_id WHERE s.name = 'main' AND t.name = 'TaxiZones')\n        BEGIN\n            CREATE TABLE main.TaxiZones\n            (\n                LocationId INT,\n                [Borough] nvarchar(100),\n                [Zone] nvarchar(100),\n                [ServiceZone] nvarchar(100)\n            )\n            WITH\n            (\n                DISTRIBUTION = HASH(LocationId),\n                CLUSTERED COLUMNSTORE INDEX            \n            )\n        END\n    ELSE\n        BEGIN\n            TRUNCATE TABLE main.TaxiZones\n        END\n\n    /******************************************************************************\n        Copy data to main.TaxiZones table\n    ******************************************************************************/\n    COPY INTO main.TaxiZones\n        (LocationId 1, Borough 2, Zone 3, ServiceZone 4)\n    FROM 'https://pstaxisdatalake.dfs.core.windows.net/taxidata/TaxiZones/*.csv'\n    WITH\n    (\n          FILE_TYPE = 'CSV'\n        , MAXERRORS = 10\n        , FIRSTROW = 2\n        , ERRORFILE = 'https://pstaxisdatalake.dfs.core.windows.net/taxidata/Errors/TaxiZones'\n        , IDENTITY_INSERT = 'OFF'\n    )\n\n    /******************************************************************************\n        Load the data to Data Lake using CETAS statement\n    ******************************************************************************/\n    IF NOT EXISTS (SELECT * FROM sys.external_data_sources d WHERE d.name = 'PSDataLakeOutput')\n    BEGIN\n        CREATE EXTERNAL DATA SOURCE PSDataLakeOutput\n        WITH \n        (  \n            TYPE = HADOOP,\n            LOCATION ='abfss://taxioutput@pstaxisdatalake.dfs.core.windows.net',  \n            CREDENTIAL = PSDataLakeCredential  \n        )\n    END\n\n    IF EXISTS (SELECT * FROM sys.external_tables t INNER JOIN sys.schemas s ON t.schema_id = s.schema_id WHERE s.name = 'ext' AND t.name = 'ProcessedTaxiZones')\n    BEGIN\n        DROP EXTERNAL TABLE ext.ProcessedTaxiZones\n    END\n\n    CREATE EXTERNAL TABLE ext.ProcessedTaxiZones\n    WITH \n    (  \n        DATA_SOURCE = PSDataLakeOutput,\n        FILE_FORMAT = SynapseParquetFormat,\n        LOCATION='/Dimensions/TaxiZones.parquet'    \n    )\n    AS\n    SELECT *\n    FROM ext.TaxiZones;\n    \nEND\nGO\n",
+					"metadata": {
+						"language": "sql"
+					},
+					"currentConnection": {
+						"databaseName": "master",
+						"poolName": "Built-in"
+					},
+					"resultLimit": 5000
+				},
+				"type": "SqlQuery"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/3- LoadYellowTaxis Stored Procedure')]",
+			"type": "Microsoft.Synapse/workspaces/sqlscripts",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"folder": {
+					"name": "Synapse Pipelines"
+				},
+				"content": {
+					"query": "CREATE PROCEDURE main.LoadYellowTaxis (@Date VARCHAR(10))\nAS \nBEGIN\n\n    /******************************************************************************\n        Drop and recreate external table for Yellow Taxis\n    ******************************************************************************/\n    IF EXISTS (SELECT * FROM sys.external_tables t INNER JOIN sys.schemas s ON t.schema_id = s.schema_id WHERE s.name = 'ext' AND t.name = 'YellowTaxis')\n    BEGIN\n        DROP EXTERNAL TABLE ext.YellowTaxis\n    END\n    \n    DECLARE @ExternalTableScript NVARCHAR(4000);\n\n    SET @ExternalTableScript = '\n        CREATE EXTERNAL TABLE ext.YellowTaxis \n        (\n            [VendorID] INT,\n            [tpep_pickup_datetime] DATETIME2,\n            [tpep_dropoff_datetime] DATETIME2,\n            [passenger_count] INT,\n            [trip_distance] FLOAT,\n            [RatecodeID] INT,\n            [store_and_fwd_flag] varchar(100),\n            [PULocationID] INT,\n            [DOLocationID] INT,\n            [payment_type] INT,\n            [fare_amount] FLOAT,\n            [extra] FLOAT,\n            [mta_tax] FLOAT,\n            [tip_amount] FLOAT,\n            [tolls_amount] FLOAT,\n            [improvement_surcharge] FLOAT,\n            [total_amount] FLOAT,\n            [congestion_surcharge] FLOAT\n        )\n        WITH \n        (\n            LOCATION = ''YellowTaxis_' + @Date + '.parquet'',\n            DATA_SOURCE = PSDataLake,\n            FILE_FORMAT = SynapseParquetFormat,\n            REJECT_TYPE = VALUE,\n            REJECT_VALUE = 100\n        )'\n\n    EXECUTE sp_executesql @ExternalTableScript;\n\n    /******************************************************************************\n        Load data into main.YellowTaxis\n    ******************************************************************************/    \n    INSERT INTO main.YellowTaxis (VendorID, tpep_pickup_datetime, tpep_dropoff_datetime, passenger_count, \n                                  trip_distance, RatecodeID, store_and_fwd_flag, PULocationID, DOLocationID, \n                                  payment_type, fare_amount, extra, mta_tax, tip_amount, tolls_amount, \n                                  improvement_surcharge, total_amount, congestion_surcharge)\n    \n    SELECT                        VendorID, tpep_pickup_datetime, tpep_dropoff_datetime, passenger_count, \n                                  trip_distance, RatecodeID, store_and_fwd_flag, PULocationID, DOLocationID, \n                                  payment_type, fare_amount, extra, mta_tax, tip_amount, tolls_amount, \n                                  improvement_surcharge, total_amount, congestion_surcharge\n    FROM ext.YellowTaxis;\n\n    /******************************************************************************\n        Load the data to Data Lake using CETAS statement\n    ******************************************************************************/\n    IF EXISTS (SELECT * FROM sys.external_tables t INNER JOIN sys.schemas s ON t.schema_id = s.schema_id WHERE s.name = 'ext' AND t.name = 'ProcessedYellowTaxis')\n    BEGIN\n        DROP EXTERNAL TABLE ext.ProcessedYellowTaxis\n    END\n\n    CREATE EXTERNAL TABLE ext.ProcessedYellowTaxis\n    WITH \n    (  \n        DATA_SOURCE = PSDataLakeOutput,\n        FILE_FORMAT = SynapseParquetFormat,\n        LOCATION='/Facts/YellowTaxis.parquet'    \n    )\n    AS\n    SELECT *\n    FROM main.YellowTaxis;\n    \nEND\nGO\n\n\n",
+					"metadata": {
+						"language": "sql"
+					},
+					"currentConnection": {
+						"databaseName": "master",
+						"poolName": "Built-in"
+					},
+					"resultLimit": 5000
+				},
+				"type": "SqlQuery"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/1 - Serverless Query - FHVTaxis Parquet')]",
+			"type": "Microsoft.Synapse/workspaces/sqlscripts",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"folder": {
+					"name": "Serverless SQL"
+				},
+				"content": {
+					"query": "SELECT\n    TOP 100 *\nFROM\n    OPENROWSET(\n        BULK 'https://pstaxisdatalake.dfs.core.windows.net/taxioutput/Facts/FhvTaxis.parquet/TripYear=2019/TripMonth=11/TripDay=1/part-00000-bf814e8a-6a0a-4e9b-80a9-6884ba3137ef.c000.snappy.parquet',\n        FORMAT='PARQUET'\n    ) AS fhv\n\n\n\n\n\n\n\nSELECT\n    TOP 100 *\nFROM\n    OPENROWSET(\n        BULK 'https://pstaxisdatalake.dfs.core.windows.net/taxioutput/Facts/FhvTaxis.parquet/**',\n        FORMAT='PARQUET'\n    ) AS fhv\n\n\n\n\n\n\nSELECT TOP 100 \n      FileLocation = fhv.filepath()\n    , FileName = fhv.filename()\n    , *\nFROM\n    OPENROWSET(\n        BULK 'https://pstaxisdatalake.dfs.core.windows.net/taxioutput/Facts/FhvTaxis.parquet/**',\n        FORMAT='PARQUET'\n    ) AS fhv\n\n\n\n\nSELECT TOP 100 \n      TripYear = fhv.filepath(1)\n    , TripMonth = fhv.filepath(2)\n    , TriDay = fhv.filepath(3)\n    , *\nFROM\n    OPENROWSET(\n        BULK 'https://pstaxisdatalake.dfs.core.windows.net/taxioutput/Facts/FhvTaxis.parquet/TripYear=*/TripMonth=*/TripDay=*/**',\n        FORMAT='PARQUET'\n    ) AS fhv\nWHERE fhv.filepath(3) = '1'\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n",
+					"metadata": {
+						"language": "sql"
+					},
+					"currentConnection": {
+						"databaseName": "master",
+						"poolName": "Built-in"
+					},
+					"resultLimit": 5000
+				},
+				"type": "SqlQuery"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/2- Serverless Query - TaxiZones CSV')]",
+			"type": "Microsoft.Synapse/workspaces/sqlscripts",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"folder": {
+					"name": "Serverless SQL"
+				},
+				"content": {
+					"query": "-- This is auto-generated code\nSELECT\n    TOP 100 *\nFROM\n    OPENROWSET(\n    BULK 'https://pstaxisdatalake.dfs.core.windows.net/taxidata/TaxiZones/TaxiZones1.csv',\n        FORMAT = 'CSV',\n        PARSER_VERSION='2.0',\n        HEADER_ROW = TRUE\n    ) AS [result]\n\n\n\nSELECT\n    TOP 100 *\nFROM\n    OPENROWSET(\n        BULK 'https://pstaxisdatalake.dfs.core.windows.net/taxidata/TaxiZones/TaxiZones1.csv',\n        FORMAT = 'CSV',\n        PARSER_VERSION='2.0',\n        HEADER_ROW = TRUE\n    )\n    WITH (\n        LocationId INT               1,\n        Borough VARCHAR(100)         2,\n        Zone VARCHAR(100)            3,\n        ServiceZone VARCHAR(100)     4\n    ) AS zones\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n",
+					"metadata": {
+						"language": "sql"
+					},
+					"currentConnection": {
+						"databaseName": "master",
+						"poolName": "Built-in"
+					},
+					"resultLimit": 5000
+				},
+				"type": "SqlQuery"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/3 - Serverless Query - Create External Table')]",
+			"type": "Microsoft.Synapse/workspaces/sqlscripts",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"folder": {
+					"name": "Serverless SQL"
+				},
+				"content": {
+					"query": "IF NOT EXISTS (SELECT * FROM sys.external_file_formats WHERE name = 'SynapseParquetFormat') \n\tCREATE EXTERNAL FILE FORMAT [SynapseParquetFormat] \n\tWITH ( FORMAT_TYPE = PARQUET)\nGO\n\nIF NOT EXISTS (SELECT * FROM sys.external_data_sources WHERE name = 'taxioutput_pstaxisdatalake_dfs_core_windows_net') \n\tCREATE EXTERNAL DATA SOURCE [taxioutput_pstaxisdatalake_dfs_core_windows_net] \n\tWITH (\n\t\tLOCATION   = 'https://pstaxisdatalake.dfs.core.windows.net/taxioutput', \n\t)\nGo\n\nCREATE EXTERNAL TABLE RateCodesExternal (\n\t[RateCodeId] int,\n\t[RateCode] varchar(8000),\n\t[Approved] bit\n\t)\n\tWITH (\n\tLOCATION = 'Dimensions/RateCodes.parquet',\n\tDATA_SOURCE = [taxioutput_pstaxisdatalake_dfs_core_windows_net],\n\tFILE_FORMAT = [SynapseParquetFormat]\n\t)\nGO\n\nSELECT TOP 100 * FROM RateCodesExternal\nGO\n\n",
+					"metadata": {
+						"language": "sql"
+					},
+					"currentConnection": {
+						"databaseName": "master",
+						"poolName": "Built-in"
+					},
+					"resultLimit": 5000
+				},
+				"type": "SqlQuery"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/4 - TaxisDataMart - Views')]",
+			"type": "Microsoft.Synapse/workspaces/sqlscripts",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"folder": {
+					"name": "Serverless SQL"
+				},
+				"content": {
+					"query": "/**************************************************************************************\n  Create schema for Dimensions and Facts\n**************************************************************************************/\n\nCREATE SCHEMA dim;\nGO\n\nCREATE SCHEMA fact;\nGO\n\n\n/**************************************************************************************\n  View for Rate Codes\n**************************************************************************************/\n\nCREATE VIEW dim.RateCodes \nAS\nSELECT *\nFROM\n    OPENROWSET(\n        BULK 'https://pstaxisdatalake.dfs.core.windows.net/taxioutput/Dimensions/RateCodes.parquet',\n        FORMAT='PARQUET'\n    ) AS rateCodes\nGO\n\n/**************************************************************************************\n  View for Taxi Zones\n**************************************************************************************/\n\nCREATE VIEW dim.TaxiZones\nAS\nSELECT *\nFROM\n    OPENROWSET(\n        BULK 'https://pstaxisdatalake.dfs.core.windows.net/taxioutput/Dimensions/TaxiZones.parquet',\n        FORMAT='PARQUET'\n    ) AS taxiZones\nGO\n\n/**************************************************************************************\n  View for Yellow Taxis\n**************************************************************************************/\n\nCREATE VIEW fact.YellowTaxis\nAS\nSELECT *\nFROM\n    OPENROWSET(\n        BULK 'https://pstaxisdatalake.dfs.core.windows.net/taxioutput/Facts/YellowTaxis.parquet',\n        FORMAT='PARQUET'\n    ) AS yellowTaxis\nGO\n\n/**************************************************************************************\n  View for Green Taxis\n**************************************************************************************/\n\nCREATE VIEW fact.GreenTaxis\nAS\nSELECT *\nFROM\n    OPENROWSET(\n        BULK 'https://pstaxisdatalake.dfs.core.windows.net/taxioutput/Facts/GreenTaxis.parquet',\n        FORMAT='PARQUET'\n    ) AS greenTaxis\nGO\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n",
+					"metadata": {
+						"language": "sql"
+					},
+					"currentConnection": {
+						"databaseName": "master",
+						"poolName": "Built-in"
+					},
+					"resultLimit": 5000
+				},
+				"type": "SqlQuery"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/5- TaxisDataMart Views on Spark DB')]",
+			"type": "Microsoft.Synapse/workspaces/sqlscripts",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"folder": {
+					"name": "Serverless SQL"
+				},
+				"content": {
+					"query": "/**************************************************************************************\n  View for FHV Bases\n**************************************************************************************/\n\nCREATE VIEW dim.FHVBases\nAS\n    SELECT TOP (100) [BaseLicenseId]\n        ,[BaseType]\n        ,[AddressBuilding]\n        ,[AddressStreet]\n        ,[AddressCity]\n        ,[AddressState]\n        ,[AddressPostalCode]\n    FROM [fhvwarehouse].[dbo].[fhvbases]\nGO\n\n\n/**************************************************************************************\n  View for FHV Trips\n**************************************************************************************/\n\nCREATE VIEW fact.FHVTrips\nAS\n    SELECT [CompanyLicenseId]\n        ,[BaseLicenseId]\n        ,[PickupTime]\n        ,[DropTime]\n        ,[PickupLocationId]\n        ,[DropLocationId]\n        ,[TripYear]\n        ,[TripMonth]\n        ,[TripDay]\n    FROM [fhvwarehouse].[dbo].[fhvtrips]\nGO\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n",
+					"metadata": {
+						"language": "sql"
+					},
+					"currentConnection": {
+						"databaseName": "master",
+						"poolName": "Built-in"
+					},
+					"resultLimit": 5000
+				},
+				"type": "SqlQuery"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/2- Serverless SQL - Query CosmosDB')]",
+			"type": "Microsoft.Synapse/workspaces/sqlscripts",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"folder": {
+					"name": "Connect Servers"
+				},
+				"content": {
+					"query": "CREATE CREDENTIAL [pltaxiscosmosdb]\nWITH IDENTITY = 'SHARED ACCESS SIGNATURE', SECRET = 'mjuS6UKXLyxJbclfX4l90z66ak4sk1eUxzuUwKnIVwUbs2i7l8sAykFDfWJ1GeC7CplwwSw6VbnzgdRxHJbxlQ=='\nGO\n\nSELECT TOP 100 \n      RideId\n    , PickupLocationId\n    , Rating\n    , Feedback\nFROM OPENROWSET(​PROVIDER = 'CosmosDB',\n                CONNECTION = 'Account=pltaxicosmosdb;Database=RidesDB',\n                OBJECT = 'RidesFeedback',\n                SERVER_CREDENTIAL = 'pltaxiscosmosdb'\n) AS [RidesFeedback]\n\n\n\n\n",
+					"metadata": {
+						"language": "sql"
+					},
+					"currentConnection": {
+						"databaseName": "master",
+						"poolName": "Built-in"
+					},
+					"resultLimit": 5000
+				},
+				"type": "SqlQuery"
 			},
 			"dependsOn": []
 		}

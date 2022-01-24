@@ -5,6 +5,9 @@
 		"workspaceName": {
 			"value": "rcgwchpqipidcte4pocws1"
 		},
+		"TestStorageLakehouse_connectionString": {
+			"value": ""
+		},
 		"TripFaresSynapseAnalyticsLinkedService_connectionString": {
 			"value": ""
 		},
