@@ -1,0 +1,606 @@
+{
+	"name": "2 - Process FHV Data - Development",
+	"properties": {
+		"folder": {
+			"name": "Synapse Spark Pool"
+		},
+		"nbformat": 4,
+		"nbformat_minor": 2,
+		"bigDataPool": {
+			"referenceName": "ws1sparkpool1",
+			"type": "BigDataPoolReference"
+		},
+		"sessionProperties": {
+			"driverMemory": "56g",
+			"driverCores": 8,
+			"executorMemory": "56g",
+			"executorCores": 8,
+			"numExecutors": 2,
+			"conf": {
+				"spark.dynamicAllocation.enabled": "false",
+				"spark.dynamicAllocation.minExecutors": "2",
+				"spark.dynamicAllocation.maxExecutors": "2",
+				"spark.autotune.trackingId": "c762319c-aeea-4e6d-8e1b-058bc285089c"
+			}
+		},
+		"metadata": {
+			"saveOutput": true,
+			"enableDebugMode": false,
+			"kernelspec": {
+				"name": "synapse_pyspark",
+				"display_name": "python"
+			},
+			"language_info": {
+				"name": "python"
+			},
+			"a365ComputeOptions": {
+				"id": "/subscriptions/6802aabb-9a39-47c2-b735-2931623a7d4a/resourceGroups/testdriveSynapse-RG/providers/Microsoft.Synapse/workspaces/rcgwchpqipidcte4pocws1/bigDataPools/ws1sparkpool1",
+				"name": "ws1sparkpool1",
+				"type": "Spark",
+				"endpoint": "https://rcgwchpqipidcte4pocws1.dev.azuresynapse.net/livyApi/versions/2019-11-01-preview/sparkPools/ws1sparkpool1",
+				"auth": {
+					"type": "AAD",
+					"authResource": "https://dev.azuresynapse.net"
+				},
+				"sparkVersion": "2.4",
+				"nodeCount": 5,
+				"cores": 8,
+				"memory": 56,
+				"automaticScaleJobs": false
+			},
+			"sessionKeepAliveTimeout": 30
+		},
+		"cells": [
+			{
+				"cell_type": "code",
+				"source": [
+					"# Create file path variable\r\n",
+					"\r\n",
+					"fhvTaxisFilePath = 'abfss://taxidata@rcgwchpqipidcte4poc.dfs.core.windows.net/fhvhv_tripdata*.csv'"
+				],
+				"execution_count": 13
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					},
+					"collapsed": true
+				},
+				"source": [
+					"# Read FHV Taxis data\r\n",
+					"\r\n",
+					"fhvTaxiTripDataDF = (\r\n",
+					"                        spark\r\n",
+					"                            .read\r\n",
+					"\r\n",
+					"                            .option(\"header\", \"true\")\r\n",
+					"                            .option(\"inferSchema\", \"true\")\r\n",
+					"\r\n",
+					"                            .csv(fhvTaxisFilePath)\r\n",
+					"                    )\r\n",
+					"\r\n",
+					"fhvTaxiTripDataDF.printSchema"
+				],
+				"execution_count": 3
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					},
+					"collapsed": false
+				},
+				"source": [
+					"# Display FHV Taxis data\r\n",
+					"\r\n",
+					"display(\r\n",
+					"    fhvTaxiTripDataDF.limit(1000)\r\n",
+					")"
+				],
+				"execution_count": 4
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					},
+					"collapsed": false
+				},
+				"source": [
+					"#Display summary of FHV Taxis\r\n",
+					"\r\n",
+					"display(\r\n",
+					"    fhvTaxiTripDataDF,\r\n",
+					"    summary=True\r\n",
+					")"
+				],
+				"execution_count": 5
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					},
+					"collapsed": true
+				},
+				"source": [
+					"# Select only limited columns\r\n",
+					"\r\n",
+					"fhvTaxiTripDataDF = (\r\n",
+					"                        fhvTaxiTripDataDF\r\n",
+					"                            .select(\r\n",
+					"                                    \"hvfhs_license_num\",\r\n",
+					"                                    \"dispatching_base_num\",\r\n",
+					"                                    \"Pickup_DateTime\", \r\n",
+					"                                    \"DropOff_DateTime\", \r\n",
+					"                                    \"PUlocationID\", \r\n",
+					"                                    \"DOlocationID\"                                    \r\n",
+					"                                )\r\n",
+					"                    )\r\n",
+					"\r\n",
+					"fhvTaxiTripDataDF.printSchema"
+				],
+				"execution_count": 6
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					},
+					"collapsed": true
+				},
+				"source": [
+					"# Rename the columns\r\n",
+					"\r\n",
+					"fhvTaxiTripDataDF = (\r\n",
+					"                        fhvTaxiTripDataDF\r\n",
+					"                            .withColumnRenamed(\"hvfhs_license_num\", \"CompanyLicenseId\")\r\n",
+					"                            .withColumnRenamed(\"dispatching_base_num\", \"BaseLicenseId\")\r\n",
+					"                            .withColumnRenamed(\"Pickup_DateTime\", \"PickupTime\")\r\n",
+					"                            .withColumnRenamed(\"DropOff_DateTime\", \"DropTime\")\r\n",
+					"                            .withColumnRenamed(\"PUlocationID\", \"PickupLocationId\")\r\n",
+					"                            .withColumnRenamed(\"DOlocationID\", \"DropLocationId\")                            \r\n",
+					"                    )\r\n",
+					"\r\n",
+					"fhvTaxiTripDataDF.printSchema"
+				],
+				"execution_count": 7
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					},
+					"collapsed": true
+				},
+				"source": [
+					"from pyspark.sql.functions import *\r\n",
+					"\r\n",
+					"# Create derived columns for year, month and day\r\n",
+					"fhvTaxiTripDataDF = (\r\n",
+					"                        fhvTaxiTripDataDF\r\n",
+					"                            .withColumn(\"TripYear\", year(col(\"PickupTime\")))\r\n",
+					"                            .withColumn(\"TripMonth\", month(col(\"PickupTime\")))\r\n",
+					"                            .withColumn(\"TripDay\", dayofmonth(col(\"PickupTime\")))\r\n",
+					"                    )\r\n",
+					"\r\n",
+					"fhvTaxiTripDataDF.printSchema"
+				],
+				"execution_count": 8
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					},
+					"collapsed": false
+				},
+				"source": [
+					"# Filter inaccurate data\r\n",
+					"\r\n",
+					"fhvTaxiTripDataDF = (\r\n",
+					"                        fhvTaxiTripDataDF\r\n",
+					"                            .where(\"PickupTime >= '2019-11-01' AND PickupTime < '2019-12-01'\")\r\n",
+					"                    )\r\n",
+					"\r\n",
+					"\r\n",
+					"display(fhvTaxiTripDataDF.limit(100))"
+				],
+				"execution_count": 9
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					},
+					"collapsed": true
+				},
+				"source": [
+					"# Create file path variable\r\n",
+					"\r\n",
+					"fhvBasesFilePath = 'abfss://taxidata@pstaxisdatalake.dfs.core.windows.net/FhvBases.json'"
+				],
+				"execution_count": 12
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					},
+					"collapsed": false
+				},
+				"source": [
+					"# Read FHV Bases json file\r\n",
+					"\r\n",
+					"fhvBasesDF = (\r\n",
+					"                spark\r\n",
+					"                  .read\r\n",
+					"                  .option(\"multiline\", \"true\")\r\n",
+					"                  .json(fhvBasesFilePath)\r\n",
+					"             )\r\n",
+					"\r\n",
+					"display(fhvBasesDF)"
+				],
+				"execution_count": 14
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					},
+					"collapsed": false
+				},
+				"source": [
+					"from pyspark.sql.functions import *\r\n",
+					"\r\n",
+					"# Flatten FHV Bases data\r\n",
+					"\r\n",
+					"fhvBasesFlatDF = (\r\n",
+					"                    fhvBasesDF\r\n",
+					"                        .select(\r\n",
+					"                                    col(\"License Number\").alias(\"BaseLicenseId\"),\r\n",
+					"                                    col(\"Type of Base\").alias(\"BaseType\"),\r\n",
+					"\r\n",
+					"                                    col(\"Address.Building\").alias(\"AddressBuilding\"),\r\n",
+					"                                    col(\"Address.Street\").alias(\"AddressStreet\"),\r\n",
+					"                                    col(\"Address.City\").alias(\"AddressCity\"),\r\n",
+					"                                    col(\"Address.State\").alias(\"AddressState\"),\r\n",
+					"                                    col(\"Address.PostCode\").alias(\"AddressPostalCode\")\r\n",
+					"                               )\r\n",
+					"                )\r\n",
+					"\r\n",
+					"display(fhvBasesFlatDF)"
+				],
+				"execution_count": 15
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					},
+					"collapsed": false
+				},
+				"source": [
+					"# Create a dataframe joining FHV trip data with bases\r\n",
+					"\r\n",
+					"fhvTaxiTripDataWithBasesDF = (\r\n",
+					"                                fhvTaxiTripDataDF\r\n",
+					"                                     .join(fhvBasesFlatDF,                                               \r\n",
+					"                                               \"BaseLicenseId\",\r\n",
+					"                                                \"inner\"\r\n",
+					"                                          )\r\n",
+					"                             )\r\n",
+					"\r\n",
+					"display(fhvTaxiTripDataWithBasesDF)"
+				],
+				"execution_count": 16
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					},
+					"collapsed": true
+				},
+				"source": [
+					"from pyspark.sql.functions import *\r\n",
+					"\r\n",
+					"fhvTaxiTripDataDF = (\r\n",
+					"                        spark\r\n",
+					"                            .read\r\n",
+					"                            .option(\"header\", \"true\")\r\n",
+					"                            .option(\"inferSchema\", \"true\")\r\n",
+					"                            .csv(fhvTaxisFilePath)\r\n",
+					"                    )\r\n",
+					"\r\n",
+					"fhvTaxiTripDataDF = (\r\n",
+					"                        fhvTaxiTripDataDF\r\n",
+					"\r\n",
+					"                            # Select limited columns\r\n",
+					"                            .select(\r\n",
+					"                                    \"hvfhs_license_num\",\r\n",
+					"                                    \"dispatching_base_num\",\r\n",
+					"                                    \"Pickup_DateTime\", \r\n",
+					"                                    \"DropOff_DateTime\", \r\n",
+					"                                    \"PUlocationID\", \r\n",
+					"                                    \"DOlocationID\"                                    \r\n",
+					"                                )\r\n",
+					"\r\n",
+					"                            #Rename the columns\r\n",
+					"                            .withColumnRenamed(\"hvfhs_license_num\", \"CompanyLicenseId\")\r\n",
+					"                            .withColumnRenamed(\"dispatching_base_num\", \"BaseLicenseId\")\r\n",
+					"                            .withColumnRenamed(\"Pickup_DateTime\", \"PickupTime\")\r\n",
+					"                            .withColumnRenamed(\"DropOff_DateTime\", \"DropTime\")\r\n",
+					"                            .withColumnRenamed(\"PUlocationID\", \"PickupLocationId\")\r\n",
+					"                            .withColumnRenamed(\"DOlocationID\", \"DropLocationId\")\r\n",
+					"\r\n",
+					"                            # Create derived columns for year, month and day\r\n",
+					"                            .withColumn(\"TripYear\", year(col(\"PickupTime\")))\r\n",
+					"                            .withColumn(\"TripMonth\", month(col(\"PickupTime\")))\r\n",
+					"                            .withColumn(\"TripDay\", dayofmonth(col(\"PickupTime\")))\r\n",
+					"\r\n",
+					"                            # Filter records based on PickupTime\r\n",
+					"                            .where(\"PickupTime >= '2019-11-01' AND PickupTime < '2019-12-01'\")\r\n",
+					"                    )\r\n",
+					"\r\n",
+					"\r\n",
+					"# Flatten FHV Bases data\r\n",
+					"fhvBasesFlatDF = (\r\n",
+					"                    fhvBasesDF\r\n",
+					"                        .select(\r\n",
+					"                                    col(\"License Number\").alias(\"BaseLicenseId\"),\r\n",
+					"                                    col(\"Type of Base\").alias(\"BaseType\"),\r\n",
+					"\r\n",
+					"                                    col(\"Address.Building\").alias(\"AddressBuilding\"),\r\n",
+					"                                    col(\"Address.Street\").alias(\"AddressStreet\"),\r\n",
+					"                                    col(\"Address.City\").alias(\"AddressCity\"),\r\n",
+					"                                    col(\"Address.State\").alias(\"AddressState\"),\r\n",
+					"                                    col(\"Address.PostCode\").alias(\"AddressPostalCode\")\r\n",
+					"                               )\r\n",
+					"                )\r\n",
+					"\r\n",
+					"# Create a dataframe joining FHV trip data with bases\r\n",
+					"fhvTaxiTripDataWithBasesDF = (\r\n",
+					"                                fhvTaxiTripDataDF\r\n",
+					"                                     .join(fhvBasesFlatDF,                                               \r\n",
+					"                                               \"BaseLicenseId\",\r\n",
+					"                                                \"inner\"\r\n",
+					"                                          )\r\n",
+					"                             )\r\n",
+					"\r\n",
+					"display(fhvTaxiTripDataWithBasesDF)"
+				],
+				"execution_count": null
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					},
+					"microsoft": {
+						"language": "sparksql"
+					},
+					"collapsed": false
+				},
+				"source": [
+					"%%sql\r\n",
+					"\r\n",
+					"CREATE DATABASE FhvWarehouse"
+				],
+				"execution_count": 17
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					},
+					"collapsed": true
+				},
+				"source": [
+					"(\r\n",
+					"    fhvTaxiTripDataDF\r\n",
+					"        .write\r\n",
+					"        .partitionBy(\"TripYear\", \"TripMonth\", \"TripDay\")\r\n",
+					"        .mode(\"overwrite\")\r\n",
+					"        .parquet(\"abfss://taxioutput@pstaxisdatalake.dfs.core.windows.net/Facts/FhvTaxis.parquet\")\r\n",
+					")"
+				],
+				"execution_count": 19
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					},
+					"collapsed": true
+				},
+				"source": [
+					"(\r\n",
+					"    fhvTaxiTripDataDF\r\n",
+					"        .write\r\n",
+					"        .partitionBy(\"TripYear\", \"TripMonth\", \"TripDay\")\r\n",
+					"        .mode(\"overwrite\")        \r\n",
+					"        .saveAsTable(\"FhvWarehouse.FHVTripsManaged\")\r\n",
+					")"
+				],
+				"execution_count": 20
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					},
+					"collapsed": true
+				},
+				"source": [
+					"(\r\n",
+					"    fhvTaxiTripDataDF\r\n",
+					"        .write\r\n",
+					"        .partitionBy(\"TripYear\", \"TripMonth\", \"TripDay\")\r\n",
+					"        .mode(\"overwrite\")\r\n",
+					"        .option(\"path\", \"abfss://taxioutput@pstaxisdatalake.dfs.core.windows.net/Facts/FhvTaxis.parquet\")\r\n",
+					"        .saveAsTable(\"FhvWarehouse.FHVTrips\")\r\n",
+					")"
+				],
+				"execution_count": 21
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					},
+					"collapsed": true
+				},
+				"source": [
+					"(\r\n",
+					"    fhvBasesFlatDF\r\n",
+					"        .write        \r\n",
+					"        .mode(\"overwrite\")\r\n",
+					"        .option(\"path\", \"abfss://taxioutput@pstaxisdatalake.dfs.core.windows.net/Dimensions/FhvBases.parquet\")\r\n",
+					"        .saveAsTable(\"FhvWarehouse.FHVBases\")\r\n",
+					")"
+				],
+				"execution_count": 22
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					},
+					"collapsed": true
+				},
+				"source": [
+					""
+				],
+				"execution_count": null
+			}
+		]
+	}
+}
