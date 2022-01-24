@@ -20,7 +20,7 @@
 				"spark.dynamicAllocation.enabled": "false",
 				"spark.dynamicAllocation.minExecutors": "2",
 				"spark.dynamicAllocation.maxExecutors": "2",
-				"spark.autotune.trackingId": "c762319c-aeea-4e6d-8e1b-058bc285089c"
+				"spark.autotune.trackingId": "16d82703-9a03-4029-a68e-5d79b4cd413f"
 			}
 		},
 		"metadata": {
@@ -56,7 +56,7 @@
 				"source": [
 					"# Create file path variable\r\n",
 					"\r\n",
-					"fhvTaxisFilePath = 'abfss://taxidata@rcgwchpqipidcte4poc.dfs.core.windows.net/fhvhv_tripdata*.csv'"
+					"fhvTaxisFilePath = 'abfss://taxidata@rcgwchpqipidcte4poc.dfs.core.windows.net/FhvTaxis*.csv'"
 				],
 				"execution_count": 13
 			},
