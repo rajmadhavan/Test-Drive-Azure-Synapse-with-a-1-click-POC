@@ -1,0 +1,20 @@
+{
+	"name": "5- TaxisDataMart Views on Spark DB",
+	"properties": {
+		"folder": {
+			"name": "Serverless SQL"
+		},
+		"content": {
+			"query": "/**************************************************************************************\n  View for FHV Bases\n**************************************************************************************/\n\nCREATE VIEW dim.FHVBases\nAS\n    SELECT TOP (100) [BaseLicenseId]\n        ,[BaseType]\n        ,[AddressBuilding]\n        ,[AddressStreet]\n        ,[AddressCity]\n        ,[AddressState]\n        ,[AddressPostalCode]\n    FROM [fhvwarehouse].[dbo].[fhvbases]\nGO\n\n\n/**************************************************************************************\n  View for FHV Trips\n**************************************************************************************/\n\nCREATE VIEW fact.FHVTrips\nAS\n    SELECT [CompanyLicenseId]\n        ,[BaseLicenseId]\n        ,[PickupTime]\n        ,[DropTime]\n        ,[PickupLocationId]\n        ,[DropLocationId]\n        ,[TripYear]\n        ,[TripMonth]\n        ,[TripDay]\n    FROM [fhvwarehouse].[dbo].[fhvtrips]\nGO\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"databaseName": "master",
+				"poolName": "Built-in"
+			},
+			"resultLimit": 5000
+		},
+		"type": "SqlQuery"
+	}
+}

@@ -1,0 +1,20 @@
+{
+	"name": "3- LoadYellowTaxis Stored Procedure",
+	"properties": {
+		"folder": {
+			"name": "Synapse Pipelines"
+		},
+		"content": {
+			"query": "CREATE PROCEDURE main.LoadYellowTaxis (@Date VARCHAR(10))\nAS \nBEGIN\n\n    /******************************************************************************\n        Drop and recreate external table for Yellow Taxis\n    ******************************************************************************/\n    IF EXISTS (SELECT * FROM sys.external_tables t INNER JOIN sys.schemas s ON t.schema_id = s.schema_id WHERE s.name = 'ext' AND t.name = 'YellowTaxis')\n    BEGIN\n        DROP EXTERNAL TABLE ext.YellowTaxis\n    END\n    \n    DECLARE @ExternalTableScript NVARCHAR(4000);\n\n    SET @ExternalTableScript = '\n        CREATE EXTERNAL TABLE ext.YellowTaxis \n        (\n            [VendorID] INT,\n            [tpep_pickup_datetime] DATETIME2,\n            [tpep_dropoff_datetime] DATETIME2,\n            [passenger_count] INT,\n            [trip_distance] FLOAT,\n            [RatecodeID] INT,\n            [store_and_fwd_flag] varchar(100),\n            [PULocationID] INT,\n            [DOLocationID] INT,\n            [payment_type] INT,\n            [fare_amount] FLOAT,\n            [extra] FLOAT,\n            [mta_tax] FLOAT,\n            [tip_amount] FLOAT,\n            [tolls_amount] FLOAT,\n            [improvement_surcharge] FLOAT,\n            [total_amount] FLOAT,\n            [congestion_surcharge] FLOAT\n        )\n        WITH \n        (\n            LOCATION = ''YellowTaxis_' + @Date + '.parquet'',\n            DATA_SOURCE = PSDataLake,\n            FILE_FORMAT = SynapseParquetFormat,\n            REJECT_TYPE = VALUE,\n            REJECT_VALUE = 100\n        )'\n\n    EXECUTE sp_executesql @ExternalTableScript;\n\n    /******************************************************************************\n        Load data into main.YellowTaxis\n    ******************************************************************************/    \n    INSERT INTO main.YellowTaxis (VendorID, tpep_pickup_datetime, tpep_dropoff_datetime, passenger_count, \n                                  trip_distance, RatecodeID, store_and_fwd_flag, PULocationID, DOLocationID, \n                                  payment_type, fare_amount, extra, mta_tax, tip_amount, tolls_amount, \n                                  improvement_surcharge, total_amount, congestion_surcharge)\n    \n    SELECT                        VendorID, tpep_pickup_datetime, tpep_dropoff_datetime, passenger_count, \n                                  trip_distance, RatecodeID, store_and_fwd_flag, PULocationID, DOLocationID, \n                                  payment_type, fare_amount, extra, mta_tax, tip_amount, tolls_amount, \n                                  improvement_surcharge, total_amount, congestion_surcharge\n    FROM ext.YellowTaxis;\n\n    /******************************************************************************\n        Load the data to Data Lake using CETAS statement\n    ******************************************************************************/\n    IF EXISTS (SELECT * FROM sys.external_tables t INNER JOIN sys.schemas s ON t.schema_id = s.schema_id WHERE s.name = 'ext' AND t.name = 'ProcessedYellowTaxis')\n    BEGIN\n        DROP EXTERNAL TABLE ext.ProcessedYellowTaxis\n    END\n\n    CREATE EXTERNAL TABLE ext.ProcessedYellowTaxis\n    WITH \n    (  \n        DATA_SOURCE = PSDataLakeOutput,\n        FILE_FORMAT = SynapseParquetFormat,\n        LOCATION='/Facts/YellowTaxis.parquet'    \n    )\n    AS\n    SELECT *\n    FROM main.YellowTaxis;\n    \nEND\nGO\n\n\n",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"databaseName": "master",
+				"poolName": "Built-in"
+			},
+			"resultLimit": 5000
+		},
+		"type": "SqlQuery"
+	}
+}

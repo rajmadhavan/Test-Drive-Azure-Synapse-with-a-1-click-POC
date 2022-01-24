@@ -1,0 +1,20 @@
+{
+	"name": "2- Serverless SQL - Query CosmosDB",
+	"properties": {
+		"folder": {
+			"name": "Connect Servers"
+		},
+		"content": {
+			"query": "CREATE CREDENTIAL [pltaxiscosmosdb]\nWITH IDENTITY = 'SHARED ACCESS SIGNATURE', SECRET = 'mjuS6UKXLyxJbclfX4l90z66ak4sk1eUxzuUwKnIVwUbs2i7l8sAykFDfWJ1GeC7CplwwSw6VbnzgdRxHJbxlQ=='\nGO\n\nSELECT TOP 100 \n      RideId\n    , PickupLocationId\n    , Rating\n    , Feedback\nFROM OPENROWSET(​PROVIDER = 'CosmosDB',\n                CONNECTION = 'Account=pltaxicosmosdb;Database=RidesDB',\n                OBJECT = 'RidesFeedback',\n                SERVER_CREDENTIAL = 'pltaxiscosmosdb'\n) AS [RidesFeedback]\n\n\n\n\n",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"databaseName": "master",
+				"poolName": "Built-in"
+			},
+			"resultLimit": 5000
+		},
+		"type": "SqlQuery"
+	}
+}

@@ -1,0 +1,20 @@
+{
+	"name": "2 - LoadTaxiZones Stored Procedure",
+	"properties": {
+		"folder": {
+			"name": "Synapse Pipelines"
+		},
+		"content": {
+			"query": "CREATE PROCEDURE main.LoadTaxiZones\nAS \nBEGIN\n    \n    /******************************************************************************\n        Create or truncate main.TaxiZones\n    ******************************************************************************/\n    IF NOT EXISTS (SELECT * FROM sys.tables t INNER JOIN sys.schemas s ON t.schema_id = s.schema_id WHERE s.name = 'main' AND t.name = 'TaxiZones')\n        BEGIN\n            CREATE TABLE main.TaxiZones\n            (\n                LocationId INT,\n                [Borough] nvarchar(100),\n                [Zone] nvarchar(100),\n                [ServiceZone] nvarchar(100)\n            )\n            WITH\n            (\n                DISTRIBUTION = HASH(LocationId),\n                CLUSTERED COLUMNSTORE INDEX            \n            )\n        END\n    ELSE\n        BEGIN\n            TRUNCATE TABLE main.TaxiZones\n        END\n\n    /******************************************************************************\n        Copy data to main.TaxiZones table\n    ******************************************************************************/\n    COPY INTO main.TaxiZones\n        (LocationId 1, Borough 2, Zone 3, ServiceZone 4)\n    FROM 'https://pstaxisdatalake.dfs.core.windows.net/taxidata/TaxiZones/*.csv'\n    WITH\n    (\n          FILE_TYPE = 'CSV'\n        , MAXERRORS = 10\n        , FIRSTROW = 2\n        , ERRORFILE = 'https://pstaxisdatalake.dfs.core.windows.net/taxidata/Errors/TaxiZones'\n        , IDENTITY_INSERT = 'OFF'\n    )\n\n    /******************************************************************************\n        Load the data to Data Lake using CETAS statement\n    ******************************************************************************/\n    IF NOT EXISTS (SELECT * FROM sys.external_data_sources d WHERE d.name = 'PSDataLakeOutput')\n    BEGIN\n        CREATE EXTERNAL DATA SOURCE PSDataLakeOutput\n        WITH \n        (  \n            TYPE = HADOOP,\n            LOCATION ='abfss://taxioutput@pstaxisdatalake.dfs.core.windows.net',  \n            CREDENTIAL = PSDataLakeCredential  \n        )\n    END\n\n    IF EXISTS (SELECT * FROM sys.external_tables t INNER JOIN sys.schemas s ON t.schema_id = s.schema_id WHERE s.name = 'ext' AND t.name = 'ProcessedTaxiZones')\n    BEGIN\n        DROP EXTERNAL TABLE ext.ProcessedTaxiZones\n    END\n\n    CREATE EXTERNAL TABLE ext.ProcessedTaxiZones\n    WITH \n    (  \n        DATA_SOURCE = PSDataLakeOutput,\n        FILE_FORMAT = SynapseParquetFormat,\n        LOCATION='/Dimensions/TaxiZones.parquet'    \n    )\n    AS\n    SELECT *\n    FROM ext.TaxiZones;\n    \nEND\nGO\n",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"databaseName": "master",
+				"poolName": "Built-in"
+			},
+			"resultLimit": 5000
+		},
+		"type": "SqlQuery"
+	}
+}
