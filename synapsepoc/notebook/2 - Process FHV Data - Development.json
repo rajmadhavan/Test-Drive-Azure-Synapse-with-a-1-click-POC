@@ -20,7 +20,7 @@
 				"spark.dynamicAllocation.enabled": "false",
 				"spark.dynamicAllocation.minExecutors": "2",
 				"spark.dynamicAllocation.maxExecutors": "2",
-				"spark.autotune.trackingId": "16d82703-9a03-4029-a68e-5d79b4cd413f"
+				"spark.autotune.trackingId": "d58d423e-6d84-47a1-ae12-3a586fdbadec"
 			}
 		},
 		"metadata": {
@@ -28,7 +28,7 @@
 			"enableDebugMode": false,
 			"kernelspec": {
 				"name": "synapse_pyspark",
-				"display_name": "python"
+				"display_name": "Synapse PySpark"
 			},
 			"language_info": {
 				"name": "python"
@@ -58,7 +58,7 @@
 					"\r\n",
 					"fhvTaxisFilePath = 'abfss://taxidata@rcgwchpqipidcte4poc.dfs.core.windows.net/FhvTaxis*.csv'"
 				],
-				"execution_count": 13
+				"execution_count": 1
 			},
 			{
 				"cell_type": "code",
@@ -89,7 +89,7 @@
 					"\r\n",
 					"fhvTaxiTripDataDF.printSchema"
 				],
-				"execution_count": 3
+				"execution_count": 2
 			},
 			{
 				"cell_type": "code",
@@ -112,7 +112,7 @@
 					"    fhvTaxiTripDataDF.limit(1000)\r\n",
 					")"
 				],
-				"execution_count": 4
+				"execution_count": 3
 			},
 			{
 				"cell_type": "code",
@@ -136,7 +136,7 @@
 					"    summary=True\r\n",
 					")"
 				],
-				"execution_count": 5
+				"execution_count": 4
 			},
 			{
 				"cell_type": "code",
@@ -169,7 +169,7 @@
 					"\r\n",
 					"fhvTaxiTripDataDF.printSchema"
 				],
-				"execution_count": 6
+				"execution_count": 5
 			},
 			{
 				"cell_type": "code",
@@ -200,7 +200,7 @@
 					"\r\n",
 					"fhvTaxiTripDataDF.printSchema"
 				],
-				"execution_count": 7
+				"execution_count": 6
 			},
 			{
 				"cell_type": "code",
@@ -229,7 +229,7 @@
 					"\r\n",
 					"fhvTaxiTripDataDF.printSchema"
 				],
-				"execution_count": 8
+				"execution_count": 7
 			},
 			{
 				"cell_type": "code",
@@ -256,7 +256,7 @@
 					"\r\n",
 					"display(fhvTaxiTripDataDF.limit(100))"
 				],
-				"execution_count": 9
+				"execution_count": 8
 			},
 			{
 				"cell_type": "code",
@@ -275,9 +275,9 @@
 				"source": [
 					"# Create file path variable\r\n",
 					"\r\n",
-					"fhvBasesFilePath = 'abfss://taxidata@pstaxisdatalake.dfs.core.windows.net/FhvBases.json'"
+					"fhvBasesFilePath = 'abfss://taxidata@rcgwchpqipidcte4poc.dfs.core.windows.net/FhvBases.json'"
 				],
-				"execution_count": 12
+				"execution_count": 11
 			},
 			{
 				"cell_type": "code",
@@ -305,7 +305,7 @@
 					"\r\n",
 					"display(fhvBasesDF)"
 				],
-				"execution_count": 14
+				"execution_count": 12
 			},
 			{
 				"cell_type": "code",
@@ -342,7 +342,7 @@
 					"\r\n",
 					"display(fhvBasesFlatDF)"
 				],
-				"execution_count": 15
+				"execution_count": 13
 			},
 			{
 				"cell_type": "code",
@@ -371,7 +371,7 @@
 					"\r\n",
 					"display(fhvTaxiTripDataWithBasesDF)"
 				],
-				"execution_count": 16
+				"execution_count": 14
 			},
 			{
 				"cell_type": "code",
@@ -385,7 +385,7 @@
 							"deleting": false
 						}
 					},
-					"collapsed": true
+					"collapsed": false
 				},
 				"source": [
 					"from pyspark.sql.functions import *\r\n",
@@ -455,7 +455,7 @@
 					"\r\n",
 					"display(fhvTaxiTripDataWithBasesDF)"
 				],
-				"execution_count": null
+				"execution_count": 15
 			},
 			{
 				"cell_type": "code",
@@ -479,7 +479,7 @@
 					"\r\n",
 					"CREATE DATABASE FhvWarehouse"
 				],
-				"execution_count": 17
+				"execution_count": 16
 			},
 			{
 				"cell_type": "code",
@@ -501,10 +501,10 @@
 					"        .write\r\n",
 					"        .partitionBy(\"TripYear\", \"TripMonth\", \"TripDay\")\r\n",
 					"        .mode(\"overwrite\")\r\n",
-					"        .parquet(\"abfss://taxioutput@pstaxisdatalake.dfs.core.windows.net/Facts/FhvTaxis.parquet\")\r\n",
+					"        .parquet(\"abfss://taxioutput@rcgwchpqipidcte4poc.dfs.core.windows.net/Facts/FhvTaxis.parquet\")\r\n",
 					")"
 				],
-				"execution_count": 19
+				"execution_count": 17
 			},
 			{
 				"cell_type": "code",
@@ -529,7 +529,7 @@
 					"        .saveAsTable(\"FhvWarehouse.FHVTripsManaged\")\r\n",
 					")"
 				],
-				"execution_count": 20
+				"execution_count": 18
 			},
 			{
 				"cell_type": "code",
@@ -551,11 +551,11 @@
 					"        .write\r\n",
 					"        .partitionBy(\"TripYear\", \"TripMonth\", \"TripDay\")\r\n",
 					"        .mode(\"overwrite\")\r\n",
-					"        .option(\"path\", \"abfss://taxioutput@pstaxisdatalake.dfs.core.windows.net/Facts/FhvTaxis.parquet\")\r\n",
+					"        .option(\"path\", \"abfss://taxioutput@rcgwchpqipidcte4poc.dfs.core.windows.net/Facts/FhvTaxis.parquet\")\r\n",
 					"        .saveAsTable(\"FhvWarehouse.FHVTrips\")\r\n",
 					")"
 				],
-				"execution_count": 21
+				"execution_count": 19
 			},
 			{
 				"cell_type": "code",
@@ -576,11 +576,11 @@
 					"    fhvBasesFlatDF\r\n",
 					"        .write        \r\n",
 					"        .mode(\"overwrite\")\r\n",
-					"        .option(\"path\", \"abfss://taxioutput@pstaxisdatalake.dfs.core.windows.net/Dimensions/FhvBases.parquet\")\r\n",
+					"        .option(\"path\", \"abfss://taxioutput@rcgwchpqipidcte4poc.dfs.core.windows.net/Dimensions/FhvBases.parquet\")\r\n",
 					"        .saveAsTable(\"FhvWarehouse.FHVBases\")\r\n",
 					")"
 				],
-				"execution_count": 22
+				"execution_count": 20
 			},
 			{
 				"cell_type": "code",
