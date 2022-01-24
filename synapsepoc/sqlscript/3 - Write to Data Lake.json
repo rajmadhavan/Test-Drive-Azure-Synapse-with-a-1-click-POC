@@ -1,0 +1,20 @@
+{
+	"name": "3 - Write to Data Lake",
+	"properties": {
+		"folder": {
+			"name": "Dedicated SQL Pool"
+		},
+		"content": {
+			"query": "CREATE EXTERNAL TABLE ext.ProcessedYellowTaxis\nWITH \n(  \n    DATA_SOURCE = PSDataLake,\n    FILE_FORMAT = SynapseParquetFormat,\n    LOCATION='/Facts/YellowTaxis.parquet'    \n) \nAS\nSELECT \n      PickupTime        = tpep_pickup_datetime\n    , DropTime          = tpep_dropoff_datetime\n    , Passengers        = passenger_count\n    , TripDistance      = trip_distance\n    , RateCodeId        = RatecodeID\n    , PickupLocationId  = PULocationID\n    , DropLocationId    = DOLocationID\n    , PaymentTypeId     = payment_type\n    , TotalAmount       = total_amount    \nFROM main.YellowTaxis y\n    INNER JOIN ext.TaxiZones z ON y.PULocationID = z.LocationID\nWHERE tpep_pickup_datetime >= '2019-11-01' \n    AND tpep_pickup_datetime < '2019-12-01'\n    AND passenger_count > 0\n\tAND z.ServiceZone = 'Yellow Zone';",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"databaseName": "master",
+				"poolName": "Built-in"
+			},
+			"resultLimit": 5000
+		},
+		"type": "SqlQuery"
+	}
+}

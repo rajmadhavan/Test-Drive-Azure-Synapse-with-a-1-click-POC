@@ -1,0 +1,20 @@
+{
+	"name": "6 - Compare Distribution Performance",
+	"properties": {
+		"folder": {
+			"name": "Dedicated SQL Pool"
+		},
+		"content": {
+			"query": "-- Run query on Round Robin distributed table\nSELECT [PULocationID]\n\t, DATENAME(WEEKDAY, tpep_pickup_datetime)\n\t, AVG(\n\t\t\tDATEDIFF(SECOND, tpep_pickup_datetime, tpep_dropoff_datetime)\n\t\t )\nFROM main.YellowTaxis_RoundRobin\nGROUP BY [PULocationID]\n\t, DATENAME(WEEKDAY, tpep_pickup_datetime)\n\n\n\n-- Run query on Hash distributed table\nSELECT [PULocationID]\n\t, DATENAME(WEEKDAY, tpep_pickup_datetime)\n\t, AVG(\n\t\t\tDATEDIFF(SECOND, tpep_pickup_datetime, tpep_dropoff_datetime)\n\t\t )\nFROM main.YellowTaxis_Hash\nGROUP BY [PULocationID]\n\t, DATENAME(WEEKDAY, tpep_pickup_datetime)\n",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"databaseName": "master",
+				"poolName": "Built-in"
+			},
+			"resultLimit": 5000
+		},
+		"type": "SqlQuery"
+	}
+}

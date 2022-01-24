@@ -1,0 +1,20 @@
+{
+	"name": "5 - Table Distributions",
+	"properties": {
+		"folder": {
+			"name": "Dedicated SQL Pool"
+		},
+		"content": {
+			"query": "-- Create Round Robin table for Yellow Taxis\nCREATE TABLE main.YellowTaxis_RoundRobin\nWITH\n(\n    DISTRIBUTION = ROUND_ROBIN\n)\nAS\nSELECT * \nFROM ext.YellowTaxis\n\n-- Check distribution of data\nDBCC PDW_SHOWSPACEUSED('main.YellowTaxis_RoundRobin')\n\n-- Create Hash table for Yellow Taxis, based on PULocationID\nCREATE TABLE main.YellowTaxis_Hash\nWITH\n(\n    DISTRIBUTION = HASH(PULocationID)\n)\nAS\nSELECT  *\nFROM ext.YellowTaxis\n\n-- Check distribution of data\nDBCC PDW_SHOWSPACEUSED('main.YellowTaxis_Hash')\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"databaseName": "master",
+				"poolName": "Built-in"
+			},
+			"resultLimit": 5000
+		},
+		"type": "SqlQuery"
+	}
+}
