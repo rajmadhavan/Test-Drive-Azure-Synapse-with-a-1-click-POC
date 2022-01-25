@@ -1,0 +1,20 @@
+{
+	"name": "GreenTaxisParquetDataSet",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "TripFaresDataLakeStorageLinkedService",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "Parquet",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"folderPath": "Facts/GreenTaxis.parquet",
+				"fileSystem": "taxioutput"
+			},
+			"compressionCodec": "snappy"
+		},
+		"schema": []
+	}
+}
