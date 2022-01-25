@@ -10,8 +10,8 @@
 				"language": "sql"
 			},
 			"currentConnection": {
-				"databaseName": "master",
-				"poolName": "Built-in"
+				"databaseName": "rcgwchpqipidcte4pocws1p1",
+				"poolName": "rcgwchpqipidcte4pocws1p1"
 			},
 			"resultLimit": 5000
 		},
