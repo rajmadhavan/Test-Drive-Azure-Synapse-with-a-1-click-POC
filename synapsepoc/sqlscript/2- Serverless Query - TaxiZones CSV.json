@@ -5,7 +5,7 @@
 			"name": "Serverless SQL"
 		},
 		"content": {
-			"query": "-- This is auto-generated code\n-- It uses Exel Parser 2 \nSELECT\n    TOP 100 *\nFROM\n    OPENROWSET(\n    BULK 'https://rcgwchpqipidcte4poc.dfs.core.windows.net/taxidata/TaxiZones1.csv',\n        FORMAT = 'CSV',\n        PARSER_VERSION='2.0',\n        HEADER_ROW = TRUE\n    ) AS [result]\n\n\n\nSELECT\n    TOP 100 *\nFROM\n    OPENROWSET(\n        BULK 'https://rcgwchpqipidcte4poc.dfs.core.windows.net/taxidata/TaxiZones1.csv',\n        FORMAT = 'CSV',\n        PARSER_VERSION='2.0',\n        HEADER_ROW = TRUE\n    )\n    WITH (\n        LocationId INT               1,\n        Borough VARCHAR(100)         2,\n        Zone VARCHAR(100)            3,\n        ServiceZone VARCHAR(100)     4\n    ) AS zones\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n",
+			"query": "-- This is auto-generated code\n-- It uses Exel Parser 2 \nSELECT\n    TOP 100 *\nFROM\n    OPENROWSET(\n    BULK 'https://rcgwchpqipidcte4poc.dfs.core.windows.net/taxidata/TaxiZones1.csv',\n        FORMAT = 'CSV',\n        PARSER_VERSION='2.0',\n        HEADER_ROW = TRUE\n    ) AS [result]\n\n\n-- Define columns and data types \nSELECT\n    TOP 100 *\nFROM\n    OPENROWSET(\n        BULK 'https://rcgwchpqipidcte4poc.dfs.core.windows.net/taxidata/TaxiZones1.csv',\n        FORMAT = 'CSV',\n        PARSER_VERSION='2.0',\n        HEADER_ROW = TRUE\n    )\n    WITH (\n        LocationId INT               1,\n        Borough VARCHAR(100)         2,\n        Zone VARCHAR(100)            3,\n        ServiceZone VARCHAR(100)     4\n    ) AS zones\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n",
 			"metadata": {
 				"language": "sql"
 			},
