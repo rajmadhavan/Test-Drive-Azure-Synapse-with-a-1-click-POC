@@ -1,0 +1,17 @@
+{
+	"name": "SQL script 1",
+	"properties": {
+		"content": {
+			"query": "-- This is auto-generated code\nSELECT\n    TOP 100 \n    fileLocation = fhv.filepath()\n    ,\n    *\n      \nFROM\n    OPENROWSET(\n        BULK 'https://rcgwchpqipidcte4poc.dfs.core.windows.net/taxioutput/Facts/FhvTaxis.parquet/**',\n        FORMAT = 'PARQUET'\n    ) AS fhv\n",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"databaseName": "master",
+				"poolName": "Built-in"
+			},
+			"resultLimit": 5000
+		},
+		"type": "SqlQuery"
+	}
+}
