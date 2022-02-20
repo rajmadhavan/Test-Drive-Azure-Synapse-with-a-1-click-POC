@@ -1,0 +1,17 @@
+{
+	"name": "SQL script 4",
+	"properties": {
+		"content": {
+			"query": "SELECT TOP (100) [ChannelId]\n,[ChannelName]\n,[LocationId]\n,[ChannelLogo]\n,[TelephoneNumber]\n,[FaxNumber]\n,[EmailAddress]\n,[ChannelCommencementDate]\n,[ChannelCloseDate]\n,[ChannelCategoryId]\n,[ChannelTypeId]\n,[PartyId]\n,[DunsNumber]\n,[DunBradstreetSingleLocationSubsidiary]\n,[DunBradstreetHeadquarters]\n,[DunBradstreetBranch]\n,[DunBradstreetDivision]\n,[DunBradstreetSubsidiary]\n,[DunBradstreetParent]\n,[DunBradstreetUltimate]\n,[DunBradstreetGlobalUltimate]\n,[SicIndustryCode]\n,[NaicsNationalIndustryCode]\n,[AnzsicClassCode]\n,[TerritoryId]\n,[AreaId]\n,[RegionId]\n,[DistrictId]\n,[BrandId]\n,[FranchiseeId]\n FROM [Retail_jhn].[dbo].[Channel]",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"databaseName": "Retail_jhn",
+				"poolName": "Built-in"
+			},
+			"resultLimit": 5000
+		},
+		"type": "SqlQuery"
+	}
+}
