@@ -1,0 +1,24 @@
+{
+	"name": "Retail_jhn",
+	"properties": {
+		"Description": "",
+		"Name": "Retail_jhn",
+		"EntityType": "DATABASE",
+		"Origin": {
+			"Type": "SPARK"
+		},
+		"Properties": {
+			"DerivedModelDBInfo": "{\"ModelDirectives\":{\"BaseModel\":{\"Name\":\"Retail\",\"Version\":\"0.1.0\"}}}",
+			"IsSyMSCDMDatabase": true
+		},
+		"Source": {
+			"Provider": "ADLS",
+			"Location": "abfss://dlsrcgpocfs1@rcgwchpqipidcte4poc.dfs.core.windows.net/Retail_jhn",
+			"Properties": {
+				"FormatType": "csv",
+				"LinkedServiceName": "rcgwchpqipidcte4pocws1-WorkspaceDefaultStorage"
+			}
+		}
+	},
+	"type": "DATABASE"
+}
