@@ -190,7 +190,7 @@
 			},
 			"Properties": {
 				"textinputformat.record.delimiter": ",",
-				"compression": "",
+				"compression": "{\"type\":\"None\",\"level\":\"optimal\"}",
 				"derivedModelAttributeInfo": "{\"attributeReferences\":{\"CustomerId\":{\"entity\":\"Customer.cdm.json/Customer\",\"name\":\"CustomerId\"},\"CustomerEstablishedDate\":{\"entity\":\"Customer.cdm.json/Customer\",\"name\":\"CustomerEstablishedDate\"},\"CustomerTypeId\":{\"entity\":\"Customer.cdm.json/Customer\",\"name\":\"CustomerTypeId\"},\"ResponsibilityCenterId\":{\"entity\":\"Customer.cdm.json/Customer\",\"name\":\"ResponsibilityCenterId\"},\"LedgerId\":{\"entity\":\"Customer.cdm.json/Customer\",\"name\":\"LedgerId\"},\"LedgerAccountNumber\":{\"entity\":\"Customer.cdm.json/Customer\",\"name\":\"LedgerAccountNumber\"},\"CustomerNote\":{\"entity\":\"Customer.cdm.json/Customer\",\"name\":\"CustomerNote\"},\"PartyId\":{\"entity\":\"Customer.cdm.json/Customer\",\"name\":\"PartyId\"},\"GlobalLocationNumber\":{\"entity\":\"Customer.cdm.json/Customer\",\"name\":\"GlobalLocationNumber\"}}}"
 			},
 			"Compressed": false,
